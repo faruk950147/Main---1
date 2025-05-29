@@ -33,8 +33,8 @@ SECRET_KEY = 'django-insecure-0ccy2$s0-mwnxp6!j1xoa151_bq=4oqpu%%lex$5(ga3v)#xaa
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost:8000', 'e6d1-103-114-21-94.ngrok-free.app']
-CSRF_TRUSTED_ORIGINS = ['https://e6d1-103-114-21-94.ngrok-free.app']
+ALLOWED_HOSTS = []
+CSRF_TRUSTED_ORIGINS = []
 
 
 # Application definition
@@ -101,7 +101,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'database',
+        'NAME': 'E-shop',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',
