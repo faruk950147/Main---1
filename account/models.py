@@ -1,7 +1,4 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.http import HttpResponse
 from django.dispatch import receiver
 from django.db.models.signals import post_save
@@ -14,6 +11,8 @@ from django.utils.html import mark_safe
 #account apps 
 from account.managers import UserManager
 
+
+# Create your models here.
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
         max_length=150,
