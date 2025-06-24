@@ -154,8 +154,7 @@ class SignUpView(LogoutRequiredMixin, generic.View):
             user.save()
 
             # Sending activation email
-            ActivationEmailSender(user, request, email).send()
-            
+            ActivationEmailSender(user, request, email).send()            
             return JsonResponse({'status': 200, 'messages': 'Your account was registered successfully. Please check your email!'})
         except json.JSONDecodeError:
             return JsonResponse({'status': 400, 'messages': 'Invalid JSON data!'})
