@@ -53,8 +53,9 @@ class SingleProductView(generic.View):
         unique_colors = {variant.color.id: {'color': variant.color, 'image': variant.image or 'No Image Available', 'price': variant.price} for variant in color_variants}
 
         # Selecting the size_variants[0] size and color variant for default selection
-        if size_variants.exists():
-            selected_size_variant = size_variants[0]
+        size_variants_list = list(size_variants)
+        if len(size_variants_list) > 0:
+            selected_size_variant = size_variants_list[0]
             selected_size_id = selected_size_variant.size_id
             selected_size_title = selected_size_variant.size.title
             selected_size_image = selected_size_variant.image or 'No Image Available'
@@ -65,8 +66,9 @@ class SingleProductView(generic.View):
             selected_size_image = 'No Image Available'
             selected_price = None
 
-        if color_variants.exists():
-            selected_color_variant = color_variants[0]
+        color_variants_list = list(color_variants)
+        if len(color_variants_list) > 0:
+            selected_color_variant = color_variants_list[0]
             selected_color_id = selected_color_variant.color_id
             selected_color_title = selected_color_variant.color.title
             selected_color_image = selected_color_variant.image or 'No Image Available'
@@ -118,10 +120,10 @@ class GetColorsBySize(generic.View):
 
         variants = list(Variants.objects.filter(**filter_conditions).select_related('size', 'color'))
 
+        # Extract available colors
         if not variants:
             return JsonResponse({'status': 404, 'messages': 'No variants available'})
 
-        # Extract available colors
         colors = [
             {
                 'id': variant.color.id,
@@ -133,23 +135,29 @@ class GetColorsBySize(generic.View):
             for variant in variants if variant.color
         ]
 
-        # **Size Available but No Color**
-        if size_id and not colors:
-            selected_size_title = variants[0].size.title if variants and variants[0].size else None
-            selected_price = str(variants[0].price) if variants else "0.00"
+        # Size available but no color variants
+        if size_id and len(colors) == 0:
+            first_variant = variants[0] if len(variants) > 0 else None
+            selected_size_title = first_variant.size.title if first_variant and first_variant.size else ""
+            selected_price = str(first_variant.price) if first_variant else "0.00"
 
             return JsonResponse({
                 'status': 200,
                 'colors': [],
-                'selected_size_title': selected_size_title or "",
+                'selected_size_title': selected_size_title,
                 'selected_color_title': "",
                 'selected_price': selected_price,
                 'messages': f'Only size available: {selected_size_title or " "}'
             })
 
-        # **Color Available but No Size**
-        if not size_id and colors:
-            selected_color = next((color for color in colors if color['id'] == color_id), None) if color_id else (colors[0] if colors else None)
+        # Color available but no size selected
+        if not size_id and len(colors) > 0:
+            selected_color = None
+            if color_id:
+                selected_color = next((color for color in colors if color['id'] == color_id), None)
+            if not selected_color and len(colors) > 0:
+                selected_color = colors[0]
+
             selected_color_title = selected_color['title'] if selected_color else ""
             selected_price = selected_color['price'] if selected_color else "0.00"
 
@@ -159,13 +167,22 @@ class GetColorsBySize(generic.View):
                 'selected_size_title': "",
                 'selected_color_title': selected_color_title,
                 'selected_price': selected_price,
-                'messages': 'Only colors available'
+                'messages': f'Only colors available: {selected_color_title or " "}'
             })
 
-        # **Both Size and Color Available**
-        if colors:
-            selected_size_title = variants[0].size.title if size_id and variants else ""
-            selected_color = next((color for color in colors if color['id'] == color_id), None) if color_id else (colors[0] if colors else None)
+        # Both size and color available
+        if len(colors) > 0:
+            if size_id and len(variants) > 0 and variants[0].size:
+                selected_size_title = variants[0].size.title
+            else:
+                selected_size_title = ""
+
+            selected_color = None
+            if color_id:
+                selected_color = next((color for color in colors if color['id'] == color_id), None)
+            if not selected_color and len(colors) > 0:
+                selected_color = colors[0]
+
             selected_color_title = selected_color['title'] if selected_color else ""
             selected_price = selected_color['price'] if selected_color else "0.00"
 
