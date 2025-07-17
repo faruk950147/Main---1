@@ -238,12 +238,9 @@
 						contentType: "application/json",
 						dataType: "json",
 						success: function(res) {
-							console.log(res)
 							if(res.status == 200){
 								$('.cart-count').text(res.cart_count)
 								$('.cart-totals').text(res.cart_totals)
-
-								
 								$('.cart-items-ajax').load(location.href + ' .cart-items-ajax')
 								alertify.success(res.messages)
 							}
